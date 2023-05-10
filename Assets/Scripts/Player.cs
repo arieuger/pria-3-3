@@ -12,6 +12,9 @@ public class Player : NetworkBehaviour {
     }
 
     void Update() {
+
+        if (Input.GetKeyDown(KeyCode.Space)) GenerateNewRandomColor();
+
         transform.position = Position.Value;
         gameObject.GetComponent<SpriteRenderer>().color = GameManager.Instance.colors[ColorIndex.Value];
     }
@@ -21,8 +24,8 @@ public class Player : NetworkBehaviour {
             var randomPosition = GetRandomPositionOnPlane();
             transform.position = randomPosition;
             Position.Value = randomPosition;
-
-            SetRandomColor();
+            
+            ColorIndex.Value = Random.Range(0, GameManager.Instance.colors.Count);
             gameObject.GetComponent<SpriteRenderer>().color = GameManager.Instance.colors[ColorIndex.Value];
             
 
@@ -40,16 +43,36 @@ public class Player : NetworkBehaviour {
 
     [ServerRpc]
     void SubmitRandomColorRequestServerRpc(ServerRpcParams rpcParams = default) {
-        SetRandomColor();
+        ColorIndex.Value = SetUnrepeatedRandomColor();      
     }
 
     private static Vector3 GetRandomPositionOnPlane() {
         return new Vector2(Random.Range(-7f, 7f), Random.Range(-3f, 3f));
     }
 
-    private void SetRandomColor() {
-        int randomMatIndex = Random.Range(0, GameManager.Instance.colors.Count);
-        ColorIndex.Value = randomMatIndex;
+    private int SetUnrepeatedRandomColor() {
+        bool isRepeated = false;
+        int randomIndexColor;
+
+        do {
+            randomIndexColor = Random.Range(0, GameManager.Instance.colors.Count);
+            foreach (ulong uid in NetworkManager.Singleton.ConnectedClientsIds) {
+                isRepeated = false;
+                if (randomIndexColor == NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(uid).GetComponent<Player>().ColorIndex.Value) {
+                    isRepeated = true;
+                    break;
+                }
+            }    
+        } while (isRepeated);
+
+        return randomIndexColor;
+    }
+
+    private void GenerateNewRandomColor() {
+        if (!IsOwner) return;
+
+        if (NetworkManager.Singleton.IsServer) ColorIndex.Value = SetUnrepeatedRandomColor();
+        else SubmitRandomColorRequestServerRpc();
     }
 
 }
