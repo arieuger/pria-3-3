@@ -2,7 +2,7 @@ using UnityEngine;
 using Unity.Netcode;
 using System.Collections.Generic;
 
-public class GameManager : MonoBehaviour {
+public class GameManager : NetworkBehaviour {
 
     public static GameManager Instance;
     public List<Color> colors;
@@ -20,13 +20,20 @@ public class GameManager : MonoBehaviour {
         GUILayout.EndArea();
     }
 
-    static void StartButtons() {
+    private void StartButtons() {
+
+        // TODO: Limitar nº de xogadores
+      /*  if (NetworkManager.Singleton.ConnectedClientsIds.Count == colors.Count) {
+            GUILayout.Label("Alcanzado o límite máximo de xogadores");
+            return;
+        }*/
+
         if (GUILayout.Button("Host")) NetworkManager.Singleton.StartHost();
         if (GUILayout.Button("Client")) NetworkManager.Singleton.StartClient();
         if (GUILayout.Button("Server")) NetworkManager.Singleton.StartServer();
     }
 
-    static void StatusLabels() {
+    private void StatusLabels() {
         var mode = NetworkManager.Singleton.IsHost ? "Host" : NetworkManager.Singleton.IsServer ? "Server" : "Client";
 
         GUILayout.Label("Transport: " + NetworkManager.Singleton.NetworkConfig.NetworkTransport.GetType().Name);

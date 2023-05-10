@@ -15,6 +15,7 @@ public class Player : NetworkBehaviour {
 
         if (Input.GetKeyDown(KeyCode.Space)) GenerateNewRandomColor();
 
+        // TODO: Probar OnValueChange
         transform.position = Position.Value;
         gameObject.GetComponent<SpriteRenderer>().color = GameManager.Instance.colors[ColorIndex.Value];
     }
