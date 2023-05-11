@@ -16,6 +16,7 @@ public class Player : NetworkBehaviour {
         if (Input.GetKeyDown(KeyCode.Space)) GenerateNewRandomColor();
 
         // TODO: Probar OnValueChange
+        // https://docs-multiplayer.unity3d.com/netcode/current/basics/networkvariable/index.html#onvaluechanged-example
         transform.position = Position.Value;
         gameObject.GetComponent<SpriteRenderer>().color = GameManager.Instance.colors[ColorIndex.Value];
     }
