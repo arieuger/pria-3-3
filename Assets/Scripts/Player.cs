@@ -13,7 +13,7 @@ public class Player : NetworkBehaviour {
 
     void Update() {
 
-        if (Input.GetKeyDown(KeyCode.Space)) GenerateNewRandomColor();
+        if (Input.GetKeyDown(KeyCode.Space) && IsOwner) SubmitRandomColorRequestServerRpc();
 
         // TODO: Probar OnValueChange
         // https://docs-multiplayer.unity3d.com/netcode/current/basics/networkvariable/index.html#onvaluechanged-example
@@ -22,19 +22,9 @@ public class Player : NetworkBehaviour {
     }
 
     void Initialize() {
-        if (NetworkManager.Singleton.IsServer) {
-            var randomPosition = GetRandomPositionOnPlane();
-            transform.position = randomPosition;
-            Position.Value = randomPosition;
-            
-            ColorIndex.Value = Random.Range(0, GameManager.Instance.colors.Count);
-            gameObject.GetComponent<SpriteRenderer>().color = GameManager.Instance.colors[ColorIndex.Value];
-            
-
-        } else {
-            SubmitRandomPositionRequestServerRpc();
-            SubmitRandomColorRequestServerRpc();
-        }
+        if (!IsOwner) return;
+        SubmitRandomPositionRequestServerRpc();
+        SubmitRandomColorRequestServerRpc();
     }
 
 
@@ -68,13 +58,6 @@ public class Player : NetworkBehaviour {
         } while (isRepeated);
 
         return randomIndexColor;
-    }
-
-    private void GenerateNewRandomColor() {
-        if (!IsOwner) return;
-
-        if (NetworkManager.Singleton.IsServer) ColorIndex.Value = SetUnrepeatedRandomColor();
-        else SubmitRandomColorRequestServerRpc();
     }
 
 }
