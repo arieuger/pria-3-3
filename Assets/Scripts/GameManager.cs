@@ -22,9 +22,9 @@ public class GameManager : NetworkBehaviour {
 
     private void StartButtons() {
 
-        // TODO: Limitar nº de xogadores
+        // TODO: Limitar nï¿½ de xogadores
       /*  if (NetworkManager.Singleton.ConnectedClientsIds.Count == colors.Count) {
-            GUILayout.Label("Alcanzado o límite máximo de xogadores");
+            GUILayout.Label("Alcanzado o lï¿½mite mï¿½ximo de xogadores");
             return;
         }*/
 

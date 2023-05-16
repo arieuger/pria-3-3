@@ -7,23 +7,24 @@ public class Player : NetworkBehaviour {
     NetworkVariable<int> ColorIndex = new NetworkVariable<int>();
 
     public override void OnNetworkSpawn() {
-        // Para colocar inicialmente cada Player en un lugar distinto
+        ColorIndex.OnValueChanged += OnColorChanged;
+        Position.OnValueChanged += OnPositionChanged;
+
         if (IsOwner) Initialize();
+        else gameObject.GetComponent<SpriteRenderer>().color = GameManager.Instance.colors[ColorIndex.Value];
+    }
+
+    public override void OnNetworkDespawn() {
+        ColorIndex.OnValueChanged -= OnColorChanged;
+        Position.OnValueChanged -= OnPositionChanged;
     }
 
     void Update() {
-
         if (Input.GetKeyDown(KeyCode.Space) && IsOwner) SubmitRandomColorRequestServerRpc();
-
-        // TODO: Probar OnValueChange
-        // https://docs-multiplayer.unity3d.com/netcode/current/basics/networkvariable/index.html#onvaluechanged-example
-        transform.position = Position.Value;
-        gameObject.GetComponent<SpriteRenderer>().color = GameManager.Instance.colors[ColorIndex.Value];
     }
 
     void Initialize() {
-        if (!IsOwner) return;
-        SubmitRandomPositionRequestServerRpc();
+        SubmitRandomPositionRequestServerRpc(); // Para colocar inicialmente cada Player en un lugar distinto
         SubmitRandomColorRequestServerRpc();
     }
 
@@ -58,6 +59,17 @@ public class Player : NetworkBehaviour {
         } while (isRepeated);
 
         return randomIndexColor;
+    }
+
+
+    // Callbacks OnValueChanged
+    private void OnColorChanged(int previous, int current) {
+        gameObject.GetComponent<SpriteRenderer>().color = GameManager.Instance.colors[ColorIndex.Value];
+    }
+
+    private void OnPositionChanged(Vector3 previous, Vector3 current) {
+        Debug.Log($"Testing change: {previous} | {current}");
+        transform.position = Position.Value;
     }
 
 }
